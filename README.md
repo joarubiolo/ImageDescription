@@ -78,7 +78,3 @@ Todos los análisis se guardan automáticamente en `comments.txt` con:
 - Formatos soportados: MP4, MOV, AVI
 - Duración máxima recomendada: 30 minutos
 - La precisión depende de la calidad del video y de OpenAI
-
-## 📜 Licencia
-MIT License - Libre para uso personal y comercial
-```
