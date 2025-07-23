@@ -18,7 +18,7 @@ class AnalysisRequest(BaseModel):
 
 class ImageAnalyzer:
     def __init__(self):
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.client = OpenAI(api_key='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')
         self.pricing = {
             "gpt-4-turbo": {"input": 0.01/1000, "output": 0.03/1000}
         }
