@@ -72,11 +72,10 @@ async def analyze_image(request: AnalysisRequest):
         # Registro robusto de comentarios
         try:
             with open(COMMENTS_FILE, 'a', encoding='utf-8') as f:
-                f.write('-'*50 + '\n')
-                f.write(f'Archivo: {request.filename}\n')
-                f.write(f'Tiempo: {request.frame_time}s\n')
-                f.write(f'Análisis: {analysis["analysis"]}\n')
-                f.write(f'Costo: ${analysis["cost"]:.6f}\n')
+                f.write(f'Archivo: {request.filename}')
+                f.write(f'Tiempo: {request.frame_time}s')
+                f.write(f'Análisis: {analysis["analysis"]}')
+                f.write(f'Costo: ${analysis["cost"]:.6f}')
                 f.flush()  # Forzar escritura inmediata
         except IOError as e:
             print(f"Error escribiendo en archivo: {e}")
