@@ -69,14 +69,21 @@ async def analyze_image(request: AnalysisRequest):
         analyzer = ImageAnalyzer()
         analysis = await analyzer.analyze_image(request.image_base64)
         
-        # Registro robusto de comentarios
+        # Registro de comentarios
         try:
+#            with open(COMMENTS_FILE, 'a', encoding='utf-8') as f:
+#                f.write(f'Archivo: {request.filename}')
+#                f.write(f'Tiempo: {request.frame_time}s')
+#                f.write(f'Análisis: {analysis["analysis"]}')
+#                f.write(f'Costo: ${analysis["cost"]:.6f}')
+#                f.flush()  # Forzar escritura inmediata
             with open(COMMENTS_FILE, 'a', encoding='utf-8') as f:
-                f.write(f'Archivo: {request.filename}')
-                f.write(f'Tiempo: {request.frame_time}s')
-                f.write(f'Análisis: {analysis["analysis"]}')
-                f.write(f'Costo: ${analysis["cost"]:.6f}')
-                f.flush()  # Forzar escritura inmediata
+                f.write(f"""
+            Archivo: {request.filename}
+            Tiempo: {request.frame_time}s
+            Análisis: {analysis['analysis']}
+            Costo: ${analysis['cost']:.6f}
+            \n""")
         except IOError as e:
             print(f"Error escribiendo en archivo: {e}")
             # No fallar la petición solo por el log
