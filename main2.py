@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
@@ -11,13 +11,12 @@ load_dotenv()
 
 app = FastAPI()
 
-# Configuración de rutas
 COMMENTS_FILE = Path("comments.txt")
-COMMENTS_FILE.touch(exist_ok=True)  # Asegura que el archivo existe
+COMMENTS_FILE.touch(exist_ok=True)
 
 class AnalysisRequest(BaseModel):
     filename: str
-    frame_time: float
+    frame_time: float  # Este es el tiempo acumulado
     image_base64: str
 
 class ImageAnalyzer:
@@ -28,7 +27,6 @@ class ImageAnalyzer:
         }
     
     async def analyze_image(self, base64_image: str):
-        """Analiza una imagen en base64 con GPT-4 Vision"""
         try:
             response = self.client.chat.completions.create(
                 model="gpt-4-turbo",
@@ -52,7 +50,6 @@ class ImageAnalyzer:
             )
 
             pricing = self.pricing.get(response.model, self.pricing["gpt-4-turbo"])
-            
             cost = (response.usage.prompt_tokens * pricing["input"] + 
                     response.usage.completion_tokens * pricing["output"])
             
@@ -69,24 +66,17 @@ async def analyze_image(request: AnalysisRequest):
         analyzer = ImageAnalyzer()
         analysis = await analyzer.analyze_image(request.image_base64)
         
-        # Registro de comentarios
         try:
-#            with open(COMMENTS_FILE, 'a', encoding='utf-8') as f:
-#                f.write(f'Archivo: {request.filename}')
-#                f.write(f'Tiempo: {request.frame_time}s')
-#                f.write(f'Análisis: {analysis["analysis"]}')
-#                f.write(f'Costo: ${analysis["cost"]:.6f}')
-#                f.flush()  # Forzar escritura inmediata
             with open(COMMENTS_FILE, 'a', encoding='utf-8') as f:
                 f.write(f"""
-            Archivo: {request.filename}
-            Tiempo: {request.timing}s
-            Análisis: {analysis['analysis']}
-            Costo: ${analysis['cost']:.6f}
-            \n""")
+Archivo: {request.filename}
+Tiempo: {request.frame_time}s
+Análisis: {analysis['analysis']}
+Costo: ${analysis['cost']:.6f}
+\n""")
+                f.flush()
         except IOError as e:
             print(f"Error escribiendo en archivo: {e}")
-            # No fallar la petición solo por el log
 
         return JSONResponse(content={
             "filename": request.filename,
@@ -98,17 +88,16 @@ async def analyze_image(request: AnalysisRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error analizando imagen: {str(e)}")
 
-@app.get("/")
-async def health_check():
-    return {"status": "API funcionando"}
-
-@app.get("/comments/")
+@app.get("/comments/", response_class=PlainTextResponse)
 async def view_comments():
     try:
         with open(COMMENTS_FILE, 'r', encoding='utf-8') as f:
-            content = f.read()
-        return {"comments": content}
+            return f.read()
     except FileNotFoundError:
-        return {"comments": "No hay comentarios registrados"}
+        return "No hay comentarios registrados"
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/")
+async def health_check():
+    return {"status": "API funcionando"}
