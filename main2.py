@@ -80,7 +80,7 @@ async def analyze_image(request: AnalysisRequest):
             with open(COMMENTS_FILE, 'a', encoding='utf-8') as f:
                 f.write(f"""
             Archivo: {request.filename}
-            Tiempo: {request.frame_time}s
+            Tiempo: {request.timing}s
             Análisis: {analysis['analysis']}
             Costo: ${analysis['cost']:.6f}
             \n""")
